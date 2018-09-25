@@ -73,7 +73,7 @@ if __name__=="__main__":
 
     n_pts = -1
     print("Plot first {} points".format(n_pts))
-    plt.plot(1e9 * t[0:n_pts], driver.dac[0:n_pts])
+    plt.plot(1e9 * t[0:n_pts], driver.adc[0:n_pts])
     plt.ylim((-2**13-1000, 2**13+1000))
     plt.xlabel('Time (ns)')
     plt.ylabel('ADC Raw data')
