@@ -71,7 +71,7 @@ xdc:
 
 drivers:
   - server/drivers/common.hpp
-  - ./adc_dac_dma.hpp
+  - ./adc-dac-dma.hpp
 
 web:
   - web/index.html
