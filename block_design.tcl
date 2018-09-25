@@ -1,9 +1,6 @@
 source $board_path/config/ports.tcl
 source $board_path/base_system.tcl
 
-# Add BRAMs for ADC and DAC
-# "adc" and "dac" BRAM ranges and offsets are defined in the "memory" part of config.yml
-#
 ##################################################
 # DMA
 ##################################################

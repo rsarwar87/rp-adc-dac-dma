@@ -1,7 +1,7 @@
 ---
 name: adc-dac-dma
 board: boards/red-pitaya
-version: 0.5.0
+version: 0.5.1
 
 cores:
   - fpga/cores/redp_adc_v1_0
@@ -57,7 +57,7 @@ status_registers:
   - reg1
 
 parameters:
-  fclk0: 143000000
+  fclk0: 250000000
   adc_clk: 125000000
   dac_width: 14
   adc_width: 14
