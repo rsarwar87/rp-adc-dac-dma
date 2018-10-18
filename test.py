@@ -3,6 +3,7 @@
 
 import os
 import time
+import sys
 from koheron import command, connect
 import matplotlib.pyplot as plt
 import numpy as np
@@ -26,9 +27,10 @@ class AdcDacDma(object):
         if warning:
             if np.max(np.abs(self.dac)) >= 1:
                 print('WARNING : dac out of bounds')
-        dac_data = np.uint32(np.mod(np.floor(8192 * self.dac) + 8192, 16384) + 8192)
-        self.dac = dac_data
-        self.set_dac_data(dac_data[::2] + 16384 * dac_data[1::2])
+        dac_data = np.uint32(np.mod(np.floor(8192* self.dac) + 8192, 16384)+8192)
+        print dac_data + ( dac_data << 16)
+        self.dac = dac_data + ( dac_data << 16) 
+        self.set_dac_data(dac_data + ( dac_data << 16))
 
     @command()
     def start_dma(self):
@@ -44,8 +46,10 @@ class AdcDacDma(object):
 
     def get_adc(self):
         data = self.get_adc_data()
-        self.adc[::2] = (np.int32(data % 16384) - 8192) % 16384 - 8192
-        self.adc[1::2] = (np.int32(data >> 16) - 8192) % 16384 - 8192
+        self.adc = (np.int32(data % 16384) - 8192) % 16384 - 8192
+        self.adc = (np.int32(data >> 16) - 8192) % 16384 - 8192
+        #self.adc[::2] = (np.int32(data & 0xFFFF ))
+        #self.adc[1::2] = (np.int32(data >> 16) & 0xFFFF )
 
 if __name__=="__main__":
     host = os.getenv('HOST','192.168.1.7')
@@ -54,14 +58,16 @@ if __name__=="__main__":
 
 
     fs = 125e6
-    fmin = 1 # Hz
-    fmax = 10000 # Hz
-
     t = np.arange(driver.n) / fs
-    chirp = (fmax-fmin)/(t[-1]-t[0])
 
-    print("Set DAC waveform (chirp between {} and {} MHz)".format(1e-6*fmin, 1e-6*fmax))
-    driver.dac = 0.9 * np.cos(2*np.pi * (fmin + chirp * t) * t)
+    with open(os.path.join(sys.path[0], 'int3_cf125')) as f:
+        data = f.read()
+    x = [float(i) for i in data.split()]
+    x = np.array(x)
+    print x
+    
+    freq_mod = fs / 8 
+    driver.dac = x # 0.9 * np.cos(2 * np.pi * freq_mod * t * 1) 
     driver.set_dac()
 
     adc = np.zeros(driver.n)
@@ -73,8 +79,10 @@ if __name__=="__main__":
 
     n_pts = -1
     print("Plot first {} points".format(n_pts))
-    plt.plot(1e9 * t[0:n_pts], driver.adc[0:n_pts])
-    plt.ylim((-2**13-1000, 2**13+1000))
+    print driver.adc
+    plt.plot(driver.dac >> 16)
+    plt.plot(driver.adc)
+#    plt.ylim((-2**13-1000, 2**13+1000))
     plt.xlabel('Time (ns)')
     plt.ylabel('ADC Raw data')
     plt.show()
